@@ -14,7 +14,7 @@ const loadingBtn = document.querySelector('.loading-btn');
 
 let page = 1;
 let q = '';
-let per_page = 40;
+let perPage = 40;
 
 const lightbox = new SimpleLightbox('.gallery a', {
     nav: true,
@@ -25,6 +25,7 @@ const lightbox = new SimpleLightbox('.gallery a', {
     docClose: true,
 });
 
+// Пошук за формою
 form.addEventListener('submit', onSubmit);
 loadingBtn.addEventListener('click', loadMore);
 
@@ -66,7 +67,7 @@ async function onSubmit(event) {
       });
     }
 
-    if (total <= per_page) {
+    if (total <= perPage) {
       loadingBtn.style.display = 'none';
     }
   } catch (error) {
@@ -77,10 +78,11 @@ async function onSubmit(event) {
   }
 }
 
+// Опції для пошуку
 function searchImg(q, page) {
-  axios.defaults.baseURL = 'https://pixabay.com';
+  axios.defaults.baseURL = 'https://pixabay.com/api/';
 
-  return axios.get('/api/', {
+  return axios.get('', {
     params: {
       key: '41752354-d1ac8bee07efd7a3da621dba9',
       q,
@@ -93,6 +95,7 @@ function searchImg(q, page) {
   });
 }
 
+// Галерея
 function renderImg(hits = []) {
   return hits.reduce((html, hit) => {
     return (
@@ -110,4 +113,45 @@ function renderImg(hits = []) {
       </li>`
     );
   }, '');
+}
+
+// Кнопка 'Load more' та пошук за нею
+async function loadMore(event) {
+  event.preventDefault();
+  loaderBottom.style.display = 'block';
+  loadingBtn.style.display = 'none';
+  try {
+    page += 1;
+
+    const {
+      data: { hits, totalHits },
+    } = await searchImg(q, page);
+    const totalPage = Math.ceil(totalHits / perPage);
+
+    if (page < totalPage) {
+      loaderBottom.style.display = 'none';
+      loadingBtn.style.display = 'block';
+        gallery.insertAdjacentHTML('beforeend', renderImg(hits));
+        lightbox.refresh();
+    } else {
+      loaderBottom.style.display = 'none';
+      loadingBtn.style.display = 'none';
+
+      return iziToast.info({
+        position: 'topRight',
+        message: `We're sorry, but you've reached the end of search results.`,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  } 
+
+  const listItem = document.querySelector('.gallery-item:first-child');
+  const itemHeight = listItem.getBoundingClientRect().height;
+  console.log(itemHeight);
+  console.log(listItem);
+  window.scrollBy({
+    top: 2 * itemHeight,
+    behavior: 'smooth',
+  });
 }

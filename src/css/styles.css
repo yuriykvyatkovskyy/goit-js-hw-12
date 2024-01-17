@@ -190,3 +190,14 @@ input:active {
 .loader-bottom-box {
   height: 72px;
 }
+
+/* .gallery-items {
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  row-gap: 24px;
+  padding: 24px, 156px;
+  align-items: center;
+  justify-content: center;
+} */
